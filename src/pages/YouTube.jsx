@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { supabase, STATUSES } from '../lib/supabase'
 
-const TEAM = ['Karlo','Person 2','Person 3','Person 4','Person 5','Person 6','Person 7']
+const TEAM = ['Karlo','Bryan','Arella','Kati','Yola','Joshua Jantz','Josua Ua']
 const YT_FORMATS = ['Livestream/VOD','Podcast-Episode','Worship Session','Shorts']
 const empty = { month:'', channel_id:'youtube', post_date:'', weekday:'Sonntag', format:'Livestream/VOD', topic:'', responsible:'Team', shoot_date:'', shooting_done:false, editing_done:false, caption_done:false, thumbnail_done:false, status:'Offen', notes:'' }
 
