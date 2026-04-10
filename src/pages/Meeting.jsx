@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '../lib/supabase'
 
-const TEAM = ['Karlo','Person 2','Person 3','Person 4','Person 5','Person 6','Person 7']
+const TEAM = ['Karlo','Bryan','Arella','Kati','Yola','Joshua Jantz','Josua Ua']
 const ROUTINE = [
   {day:'Montag',action:'Sonntagsimpuls-Reel schneiden & posten',channel:'@jim_icg',color:'var(--red)'},
   {day:'Mittwoch',action:'Community Reel oder Carousel',channel:'@JIM Ketawa',color:'var(--blue)'},
