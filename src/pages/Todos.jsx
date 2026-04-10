@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '../lib/supabase'
 
-const TEAM = ['Karlo','Person 2','Person 3','Person 4','Person 5','Person 6','Person 7','Alle']
+const TEAM = ['Karlo','Bryan','Arella','Kati','Yola','Joshua Jantz','Josua Ua','Alle']
 const CHANNELS = [
   {id:'jim_icg',name:'@jim_icg'},{id:'ketawa',name:'@JIM Ketawa'},
   {id:'youtube',name:'YouTube'},{id:'podcast',name:'Podcast'},{id:'worship',name:'JIM Worship'},{id:'alle',name:'Alle'}
