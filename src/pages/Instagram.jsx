@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { supabase, FORMATS, STATUSES, WEEKDAYS } from '../lib/supabase'
 
-const TEAM = ['Karlo','Bryan','Arella','Kati','Yola','Joshua Jantz','Josua Ua']
+const TEAM = ['Alle','Karlo','Bryan','Arella','Kati','Yola','Joshua Jantz','Josua Ua']
 const IG_CHANNELS = [
   { id: 'jim_icg', name: '@jim_icg' },
   { id: 'ketawa', name: '@JIM Ketawa' },
@@ -9,50 +9,14 @@ const IG_CHANNELS = [
 ]
 const empty = { month:'', channel_id:'jim_icg', post_date:'', weekday:'Montag', format:'Reel', topic:'', responsible:'Team', shoot_date:'', shooting_done:false, editing_done:false, caption_done:false, thumbnail_done:false, status:'Offen', notes:'' }
 
-function PostCard({ post, onEdit, onDelete, onToggle, onStatus, channels }) {
-  const ch = channels.find(c => c.id === post.channel_id)
-  return (
-    <div className="post-card">
-      <div className="post-card-header">
-        <span className={`channel-tag channel-${post.channel_id}`}>{ch?.name || post.channel_id}</span>
-        <span style={{fontSize:11,color:'var(--text-dim)'}}>{post.post_date || '—'} · {post.weekday || ''}</span>
-        <span style={{fontSize:11,color:'var(--text-muted)',marginLeft:'auto'}}>{post.format}</span>
-      </div>
-      <div className="post-card-title">{post.topic}</div>
-      {(post.responsible || post.shoot_date) && (
-        <div className="post-card-meta">
-          {post.responsible && <span>→ {post.responsible}</span>}
-          {post.shoot_date && <span style={{color:'var(--purple)'}}>📸 {post.shoot_date}</span>}
-        </div>
-      )}
-      <div className="post-card-checks">
-        {[['shooting_done','🎬 Shoot'],['editing_done','✂️ Edit'],['caption_done','📝 Caption'],['thumbnail_done','🖼 Thumb']].map(([field, label]) => (
-          <div key={field} className="check" onClick={() => onToggle(post, field)}>
-            <div className={`check-box ${post[field] ? 'checked' : ''}`}/>
-            <span style={{fontSize:10,color:'var(--text-muted)'}}>{label}</span>
-          </div>
-        ))}
-      </div>
-      <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginTop:4}}>
-        <select value={post.status} onChange={e => onStatus(post.id, e.target.value)}
-          style={{background:'var(--bg)',border:'1px solid var(--border)',color:'var(--text-muted)',fontSize:11,cursor:'pointer',fontFamily:'var(--font-mono)',padding:'4px 8px',borderRadius:6}}>
-          {STATUSES.map(s => <option key={s} value={s}>{s}</option>)}
-        </select>
-        <div style={{display:'flex',gap:6}}>
-          <button className="btn btn-ghost btn-sm" onClick={() => onEdit(post)}>✎ Edit</button>
-          <button className="btn btn-danger btn-sm" onClick={() => onDelete(post.id)}>×</button>
-        </div>
-      </div>
-    </div>
-  )
-}
-
 export default function Instagram({ month }) {
   const [posts, setPosts] = useState([])
   const [showModal, setShowModal] = useState(false)
   const [form, setForm] = useState({ ...empty, month })
   const [editId, setEditId] = useState(null)
   const [filterCh, setFilterCh] = useState('all')
+  const [filterResponsible, setFilterResponsible] = useState('all')
+  const [expandedRows, setExpandedRows] = useState({})
 
   const load = async () => {
     const { data } = await supabase.from('posts').select('*')
@@ -72,8 +36,13 @@ export default function Instagram({ month }) {
   const toggleCheck = async (post, field) => { await supabase.from('posts').update({ [field]: !post[field] }).eq('id', post.id); load() }
   const setStatus = async (id, status) => { await supabase.from('posts').update({ status }).eq('id', id); load() }
   const openEdit = (post) => { setForm({ ...post }); setEditId(post.id); setShowModal(true) }
+  const toggleRow = (id) => setExpandedRows(prev => ({ ...prev, [id]: !prev[id] }))
 
-  const filtered = filterCh === 'all' ? posts : posts.filter(p => p.channel_id === filterCh)
+  const filtered = posts
+    .filter(p => filterCh === 'all' || p.channel_id === filterCh)
+    .filter(p => filterResponsible === 'all' || p.responsible === filterResponsible)
+
+  const isPosted = (post) => post.status === 'Gepostet'
 
   return (
     <div className="stack">
@@ -82,7 +51,7 @@ export default function Instagram({ month }) {
         <div style={{display:'flex',gap:4,flexWrap:'wrap'}}>
           {['all', ...IG_CHANNELS.map(c => c.id)].map(ch => (
             <button key={ch} onClick={() => setFilterCh(ch)} className={`btn btn-sm ${filterCh === ch ? 'btn-primary' : 'btn-ghost'}`}>
-              {ch === 'all' ? 'Alle' : IG_CHANNELS.find(c => c.id === ch)?.name || ch}
+              {ch === 'all' ? 'Alle Kanäle' : IG_CHANNELS.find(c => c.id === ch)?.name || ch}
             </button>
           ))}
         </div>
@@ -90,6 +59,20 @@ export default function Instagram({ month }) {
         <button className="btn btn-primary btn-sm" onClick={() => { setForm({ ...empty, month }); setEditId(null); setShowModal(true) }}>
           + Post
         </button>
+      </div>
+
+      {/* Filter Verantwortlich */}
+      <div style={{display:'flex',gap:4,flexWrap:'wrap',alignItems:'center'}}>
+        <span style={{fontSize:11,color:'var(--text-dim)',marginRight:4}}>Verantwortlich:</span>
+        {TEAM.map(name => (
+          <button
+            key={name}
+            onClick={() => setFilterResponsible(name === 'Alle' ? 'all' : name)}
+            className={`btn btn-sm ${(name === 'Alle' ? filterResponsible === 'all' : filterResponsible === name) ? 'btn-primary' : 'btn-ghost'}`}
+          >
+            {name}
+          </button>
+        ))}
       </div>
 
       {/* Stats */}
@@ -111,12 +94,102 @@ export default function Instagram({ month }) {
         })}
       </div>
 
-      {/* Post cards */}
-      {filtered.length === 0 && <div className="empty-state"><div className="empty-icon">◉</div>Noch keine Posts — füge deinen ersten hinzu!</div>}
-      {filtered.map(post => (
-        <PostCard key={post.id} post={post} channels={IG_CHANNELS}
-          onEdit={openEdit} onDelete={del} onToggle={toggleCheck} onStatus={setStatus} />
-      ))}
+      {/* Tabelle */}
+      {filtered.length === 0 && <div className="empty-state"><div className="empty-icon">◉</div>Keine Posts gefunden.</div>}
+
+      {filtered.length > 0 && (
+        <div className="card" style={{padding:0,overflow:'hidden'}}>
+          <table className="data-table">
+            <thead>
+              <tr>
+                <th>Datum</th>
+                <th>Kanal</th>
+                <th>Format</th>
+                <th>Thema</th>
+                <th>Verantwortlich</th>
+                <th>Status</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              {filtered.map(post => {
+                const posted = isPosted(post)
+                const expanded = expandedRows[post.id]
+                return (
+                  <>
+                    <tr
+                      key={post.id}
+                      style={{
+                        opacity: posted ? 0.45 : 1,
+                        transition: 'opacity 0.2s',
+                        cursor: 'pointer',
+                      }}
+                      onClick={() => toggleRow(post.id)}
+                    >
+                      <td style={{fontSize:11,color:'var(--text-muted)',whiteSpace:'nowrap'}}>
+                        {post.post_date || '—'}
+                        {post.weekday && <span style={{color:'var(--text-dim)',marginLeft:4}}>· {post.weekday}</span>}
+                      </td>
+                      <td>
+                        <span className={`channel-tag channel-${post.channel_id}`}>
+                          {IG_CHANNELS.find(c => c.id === post.channel_id)?.name || post.channel_id}
+                        </span>
+                      </td>
+                      <td style={{fontSize:11,color:'var(--text-muted)'}}>{post.format}</td>
+                      <td style={{fontWeight: posted ? 400 : 500, textDecoration: posted ? 'line-through' : 'none', color: posted ? 'var(--text-dim)' : 'inherit'}}>
+                        {post.topic}
+                      </td>
+                      <td style={{fontSize:11,color:'var(--text-muted)'}}>{post.responsible || '—'}</td>
+                      <td onClick={e => e.stopPropagation()}>
+                        <select
+                          value={post.status}
+                          onChange={e => setStatus(post.id, e.target.value)}
+                          style={{background:'transparent',border:'none',color:'var(--text-muted)',fontSize:11,cursor:'pointer',fontFamily:'var(--font-mono)'}}
+                        >
+                          {STATUSES.map(s => <option key={s} value={s}>{s}</option>)}
+                        </select>
+                      </td>
+                      <td onClick={e => e.stopPropagation()}>
+                        <div style={{display:'flex',gap:4}}>
+                          <button className="btn btn-ghost btn-sm" onClick={() => openEdit(post)}>✎</button>
+                          <button className="btn btn-danger btn-sm" onClick={() => del(post.id)}>×</button>
+                        </div>
+                      </td>
+                    </tr>
+
+                    {/* Aufgeklappte Unteraufgaben */}
+                    {expanded && (
+                      <tr key={`${post.id}-checks`} style={{background:'var(--bg2)',opacity: posted ? 0.45 : 1}}>
+                        <td colSpan={7} style={{padding:'10px 16px'}}>
+                          <div style={{display:'flex',gap:16,flexWrap:'wrap',alignItems:'center'}}>
+                            {[['shooting_done','🎬 Shoot'],['editing_done','✂️ Edit'],['caption_done','📝 Caption'],['thumbnail_done','🖼 Thumb']].map(([field, label]) => (
+                              <div
+                                key={field}
+                                className="check"
+                                onClick={(e) => { e.stopPropagation(); toggleCheck(post, field) }}
+                                style={{display:'flex',alignItems:'center',gap:6,cursor:'pointer'}}
+                              >
+                                <div className={`check-box ${post[field] ? 'checked' : ''}`}/>
+                                <span style={{fontSize:11,color: post[field] ? 'var(--green)' : 'var(--text-muted)'}}>{label}</span>
+                              </div>
+                            ))}
+                            {post.shoot_date && (
+                              <span style={{fontSize:10,color:'var(--purple)',marginLeft:'auto'}}>📸 Shooting: {post.shoot_date}</span>
+                            )}
+                            {post.notes && (
+                              <span style={{fontSize:10,color:'var(--text-dim)'}}>{post.notes}</span>
+                            )}
+                          </div>
+                        </td>
+                      </tr>
+                    )}
+                  </>
+                )
+              })}
+            </tbody>
+          </table>
+        </div>
+      )}
 
       {/* Modal */}
       {showModal && (
@@ -163,7 +236,7 @@ export default function Instagram({ month }) {
                 <div className="form-group">
                   <label className="form-label">Verantwortlich</label>
                   <select className="form-select" value={form.responsible} onChange={e => setForm(f => ({...f, responsible: e.target.value}))}>
-                    {TEAM.map(t => <option key={t} value={t}>{t}</option>)}
+                    {TEAM.filter(t => t !== 'Alle').map(t => <option key={t} value={t}>{t}</option>)}
                   </select>
                 </div>
               </div>

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '../lib/supabase'
 
-const STATUSES = ['Offen','In Arbeit','Bereit','Gepostet']
+const STATUSES = ['Offen','Filmed','In Arbeit','Bereit','Gepostet']
 const empty = { episode_number:'', guest:'', record_date:'', publish_date:'', ig_teaser:false, yt_upload:false, editing_done:false, cover_done:false, status:'Offen', notes:'' }
 
 export default function Podcast() {
@@ -35,6 +35,17 @@ export default function Podcast() {
   )
 
   const published = eps.filter(e=>e.status==='Gepostet').length
+
+  const statusColor = (status) => {
+    switch(status) {
+      case 'Offen': return 'var(--text-dim)'
+      case 'Filmed': return 'var(--blue)'
+      case 'In Arbeit': return 'var(--amber)'
+      case 'Bereit': return 'var(--green)'
+      case 'Gepostet': return 'var(--text-dim)'
+      default: return 'var(--text-muted)'
+    }
+  }
 
   return (
     <div className="stack">
@@ -71,7 +82,7 @@ export default function Podcast() {
               <tr><td colSpan={10} style={{textAlign:'center',padding:32,color:'var(--text-dim)'}}>Noch keine Episoden</td></tr>
             )}
             {eps.map(ep => (
-              <tr key={ep.id} style={ep.status==='Gepostet'?{opacity:.5}:{}}>
+              <tr key={ep.id} style={ep.status==='Gepostet'?{opacity:.45}:{}}>
                 <td style={{color:'var(--purple)',fontWeight:600}}>{ep.episode_number||'—'}</td>
                 <td style={{fontWeight:500}}>{ep.guest}{ep.notes&&<div style={{fontSize:10,color:'var(--text-dim)'}}>{ep.notes}</div>}</td>
                 <td style={{fontSize:11,color:'var(--text-muted)'}}>{ep.record_date||'—'}</td>
@@ -82,7 +93,7 @@ export default function Podcast() {
                 <td><Check ep={ep} field="cover_done" label="Cover"/></td>
                 <td>
                   <select value={ep.status} onChange={e=>setStatus(ep.id,e.target.value)}
-                    style={{background:'transparent',border:'none',color:'var(--text-muted)',fontSize:11,cursor:'pointer',fontFamily:'var(--font-mono)'}}>
+                    style={{background:'transparent',border:'none',color: statusColor(ep.status),fontSize:11,cursor:'pointer',fontFamily:'var(--font-mono)',fontWeight:500}}>
                     {STATUSES.map(s=><option key={s} value={s}>{s}</option>)}
                   </select>
                 </td>
