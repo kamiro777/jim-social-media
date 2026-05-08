@@ -1,0 +1,2 @@
+mkdir -p src/components
+mkdir -p api
