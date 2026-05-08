@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react'
 import { supabase, CHANNELS, STATUS_COLORS } from '../lib/supabase'
-import CaptionGenerator from '../components/CaptionGenerator';
 
 const IG_CHANNELS = ['jim_icg','ketawa','worship']
 
@@ -259,9 +258,6 @@ export default function Dashboard({ month }) {
           </tbody>
         </table>
       </div>
-      
-      {/* Caption Generator */}
-      <CaptionGenerator />
     </div>
   )
 }
