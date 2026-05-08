@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react'
 import { supabase, CHANNELS, STATUS_COLORS } from '../lib/supabase'
+const SUPABASE_URL = 'https://rpbheglnhnpytxiunyij.supabase.co'
+const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY
 
 const IG_CHANNELS = ['jim_icg','ketawa','worship']
 
@@ -48,6 +50,8 @@ export default function Dashboard({ month }) {
   const [episodes, setEpisodes] = useState([])
   const [loading, setLoading] = useState(true)
   const [igRange, setIgRange] = useState('this')
+  const [sendingEmail, setSendingEmail] = useState(false)
+  const [emailSent, setEmailSent] = useState(false)
 
   useEffect(() => {
     async function load() {
@@ -64,6 +68,29 @@ export default function Dashboard({ month }) {
     }
     load()
   }, [month])
+
+  async function sendWeeklySummary() {
+  setSendingEmail(true)
+  setEmailSent(false)
+  try {
+    const res = await fetch(`${SUPABASE_URL}/functions/v1/send-weekly-summary`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({}),
+    })
+    if (res.ok) {
+      setEmailSent(true)
+      setTimeout(() => setEmailSent(false), 4000)
+    }
+  } catch (e) {
+    alert('Fehler beim Senden: ' + e.message)
+  } finally {
+    setSendingEmail(false)
+  }
+}
 
   const igPosts = posts.filter(p => IG_CHANNELS.includes(p.channel_id))
   const ytPosts = posts.filter(p => p.channel_id === 'youtube')
@@ -258,6 +285,22 @@ export default function Dashboard({ month }) {
           </tbody>
         </table>
       </div>
+      {/* Wöchentliche Email */}
+<div className="card" style={{display:'flex', alignItems:'center', justifyContent:'space-between', flexWrap:'wrap', gap:12}}>
+  <div>
+    <div className="card-title" style={{margin:0}}>📧 Wöchentliche Zusammenfassung</div>
+    <div style={{fontSize:12, color:'var(--text-muted)', marginTop:4}}>
+      Automatisch jeden Montag 09:00 Uhr · oder manuell senden
+    </div>
+  </div>
+  <button
+    onClick={sendWeeklySummary}
+    disabled={sendingEmail}
+    className="btn btn-primary"
+  >
+    {sendingEmail ? '⏳ Senden...' : emailSent ? '✅ Gesendet!' : '📧 Jetzt senden'}
+  </button>
+</div>
     </div>
   )
 }
