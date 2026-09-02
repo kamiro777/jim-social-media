@@ -102,7 +102,7 @@ html,body,#root{height:100%;background:var(--bg);color:var(--text);font-family:v
 .badge.bereit{background:rgba(74,124,255,.15);color:var(--blue);border:1px solid rgba(74,124,255,.3)}
 .badge.gepostet{background:rgba(16,185,129,.15);color:var(--green);border:1px solid rgba(16,185,129,.3)}
 .channel-tag{display:inline-block;font-size:9px;padding:2px 8px;border-radius:4px;font-weight:600;letter-spacing:.5px}
-.channel-jim_icg{background:rgba(233,69,96,.15);color:var(--red)}.channel-ketawa{background:rgba(74,124,255,.15);color:var(--blue)}.channel-youtube{background:rgba(16,185,129,.15);color:var(--green)}.channel-podcast{background:rgba(139,92,246,.15);color:var(--purple)}.channel-worship{background:rgba(212,168,83,.15);color:var(--gold)}.channel-alle{background:rgba(122,122,154,.15);color:var(--text-muted)}
+.channel-jim_icg{background:rgba(233,69,96,.15);color:var(--red)}.channel-ketawa{background:rgba(74,124,255,.15);color:var(--blue)}.channel-youtube{background:rgba(16,185,129,.15);color:var(--green)}.channel-podcast{background:rgba(139,92,246,.15);color:var(--purple)}.channel-worship{background:rgba(212,168,83,.15);color:var(--gold)}.channel-alle{background:rgba(122,122,154,.15);color:var(--text-muted)}.channel-team{background:rgba(122,122,154,.15);color:var(--text-muted)}
 
 /* ── CHECKBOX ── */
 .check{display:flex;align-items:center;gap:6px;cursor:pointer}
