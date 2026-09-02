@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { supabase, STATUSES } from '../lib/supabase'
 
 const TEAM = ['Karlo','Bryan','Arella','Kati','Yola','Joshua Jantz','Josua Ua']
@@ -44,6 +45,20 @@ export default function YouTube({ month }) {
     load()
   }
   const openEdit = (post) => { setForm({...post}); setEditId(post.id); setShowModal(true) }
+
+  // Direktsprung vom Dashboard: den übergebenen Post laden und zur Bearbeitung öffnen,
+  // unabhängig davon, ob er zum aktuell gewählten Monat gehört.
+  const location = useLocation()
+  const navigate = useNavigate()
+  useEffect(() => {
+    const openId = location.state?.openId
+    if (!openId) return
+    supabase.from('posts').select('*').eq('id', openId).single().then(({ data }) => {
+      if (data) openEdit(data)
+    })
+    navigate(location.pathname, { replace: true, state: {} })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [location.state])
 
   const fmtColors = { 'Livestream/VOD':'var(--green)', 'Podcast-Episode':'var(--purple)', 'Worship Session':'var(--gold)', 'Shorts':'var(--blue)' }
 

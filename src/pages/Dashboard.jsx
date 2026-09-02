@@ -1,5 +1,18 @@
 import { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { supabase, CHANNELS } from '../lib/supabase'
+
+const IG_CHANNELS = ['jim_icg', 'ketawa', 'worship']
+
+// Ermittelt Zielroute + Aufgaben-Id, um vom Dashboard direkt zum
+// bearbeitbaren Eintrag im jeweiligen Untermenü zu springen.
+function targetFor(item) {
+  if (item.type === 'todo') return { path: '/todos', openId: item.rawId }
+  if (item.type === 'episode') return { path: '/podcast', openId: item.rawId }
+  if (item.channel_id === 'youtube') return { path: '/youtube', openId: item.rawId }
+  if (IG_CHANNELS.includes(item.channel_id)) return { path: '/instagram', openId: item.rawId }
+  return null
+}
 
 const RANGE_OPTIONS = [
   { key: 'day', label: 'Heute' },
@@ -47,9 +60,16 @@ function ChannelTag({ channelId }) {
   return <span className={`channel-tag channel-${channelId || 'team'}`}>{ch ? ch.name : 'Team'}</span>
 }
 
-function ListRow({ item }) {
+function ListRow({ item, onOpen }) {
+  const clickable = !!targetFor(item)
   return (
-    <div style={{ padding: '10px 0', borderBottom: '1px solid var(--border)', fontSize: 12 }}>
+    <div
+      onClick={clickable ? () => onOpen(item) : undefined}
+      style={{
+        padding: '10px 0', borderBottom: '1px solid var(--border)', fontSize: 12,
+        cursor: clickable ? 'pointer' : 'default',
+      }}
+    >
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 8 }}>
         <div style={{ minWidth: 0 }}>
           <div style={{ marginBottom: 3, fontWeight: 500 }}>{item.title}</div>
@@ -69,6 +89,7 @@ function ListRow({ item }) {
 }
 
 export default function Dashboard({ month }) {
+  const navigate = useNavigate()
   const [posts, setPosts] = useState([])
   const [todos, setTodos] = useState([])
   const [episodes, setEpisodes] = useState([])
@@ -94,17 +115,17 @@ export default function Dashboard({ month }) {
   // Alle Kanäle zu einer einheitlichen Liste zusammenführen
   const items = [
     ...posts.map(p => ({
-      id: `post-${p.id}`, date: p.post_date, title: p.topic,
+      id: `post-${p.id}`, rawId: p.id, type: 'post', date: p.post_date, title: p.topic,
       channel_id: p.channel_id, responsible: p.responsible, status: p.status,
       meta: p.format || null,
     })),
     ...todos.map(t => ({
-      id: `todo-${t.id}`, date: t.due_date, title: t.task,
+      id: `todo-${t.id}`, rawId: t.id, type: 'todo', date: t.due_date, title: t.task,
       channel_id: t.channel_id, responsible: t.responsible, status: 'Offen',
       meta: null,
     })),
     ...episodes.map(e => ({
-      id: `ep-${e.id}`, date: e.publish_date || e.record_date, title: `Ep ${e.episode_number || '—'} · ${e.guest}`,
+      id: `ep-${e.id}`, rawId: e.id, type: 'episode', date: e.publish_date || e.record_date, title: `Ep ${e.episode_number || '—'} · ${e.guest}`,
       channel_id: 'podcast', responsible: null, status: e.status,
       meta: e.publish_date ? null : 'Aufnahme',
     })),
@@ -115,6 +136,11 @@ export default function Dashboard({ month }) {
   const filtered = items
     .filter(i => !i.overdue && inRange(i.date, range, month))
     .sort((a, b) => a.date.localeCompare(b.date))
+
+  const openItem = (item) => {
+    const target = targetFor(item)
+    if (target) navigate(target.path, { state: { openId: target.openId } })
+  }
 
   if (loading) return <div className="empty-state"><div className="empty-icon">◈</div>Laden...</div>
 
@@ -139,7 +165,7 @@ export default function Dashboard({ month }) {
         {overdue.length > 0 && (
           <>
             <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--red)', marginBottom: 4 }}>⚠️ Überfällig ({overdue.length})</div>
-            {overdue.map(item => <ListRow key={item.id} item={item} />)}
+            {overdue.map(item => <ListRow key={item.id} item={item} onOpen={openItem} />)}
             <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', margin: '14px 0 4px' }}>
               {RANGE_OPTIONS.find(o => o.key === range)?.label}
             </div>
@@ -149,12 +175,12 @@ export default function Dashboard({ month }) {
         {filtered.length === 0 && (
           <div style={{ color: 'var(--text-dim)', fontSize: 12, padding: '4px 0' }}>Nichts Anstehendes in diesem Zeitraum ✓</div>
         )}
-        {filtered.map(item => <ListRow key={item.id} item={item} />)}
+        {filtered.map(item => <ListRow key={item.id} item={item} onOpen={openItem} />)}
 
         {undated.length > 0 && (
           <>
             <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', margin: '14px 0 4px' }}>Ohne Termin</div>
-            {undated.map(item => <ListRow key={item.id} item={item} />)}
+            {undated.map(item => <ListRow key={item.id} item={item} onOpen={openItem} />)}
           </>
         )}
       </div>

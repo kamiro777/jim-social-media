@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 
 const TEAM = ['Alle','Karlo','Bryan','Arella','Kati','Yola','Joshua Jantz','Josua Ua']
@@ -48,6 +49,20 @@ export default function Todos({ month }) {
     load()
   }
   const openEdit = (t) => { setForm({...t}); setEditId(t.id); setShowModal(true) }
+
+  // Direktsprung vom Dashboard: das übergebene To-Do laden und zur Bearbeitung öffnen,
+  // unabhängig davon, ob es zum aktuell gewählten Monat gehört.
+  const location = useLocation()
+  const navigate = useNavigate()
+  useEffect(() => {
+    const openId = location.state?.openId
+    if (!openId) return
+    supabase.from('todos').select('*').eq('id', openId).single().then(({ data }) => {
+      if (data) openEdit(data)
+    })
+    navigate(location.pathname, { replace: true, state: {} })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [location.state])
 
   const filtered = todos.filter(t =>
     filterResponsible === 'all' || t.responsible === filterResponsible

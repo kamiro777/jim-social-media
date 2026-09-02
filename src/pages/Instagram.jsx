@@ -1,4 +1,5 @@
 import { useState, useEffect, Fragment } from 'react'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { supabase, FORMATS, STATUSES, WEEKDAYS } from '../lib/supabase'
 
 const TEAM = ['Alle','Karlo','Bryan','Arella','Kati','Yola','Joshua Jantz','Josua Ua']
@@ -51,6 +52,20 @@ export default function Instagram({ month }) {
     load()
   }
   const openEdit = (post) => { setForm({ ...post }); setEditId(post.id); setShowModal(true) }
+
+  // Direktsprung vom Dashboard: den übergebenen Post laden und zur Bearbeitung öffnen,
+  // unabhängig davon, ob er zum aktuell gewählten Monat gehört.
+  const location = useLocation()
+  const navigate = useNavigate()
+  useEffect(() => {
+    const openId = location.state?.openId
+    if (!openId) return
+    supabase.from('posts').select('*').eq('id', openId).single().then(({ data }) => {
+      if (data) openEdit(data)
+    })
+    navigate(location.pathname, { replace: true, state: {} })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [location.state])
   const toggleRow = (id) => setExpandedRows(prev => ({ ...prev, [id]: !prev[id] }))
 
   const filtered = posts
