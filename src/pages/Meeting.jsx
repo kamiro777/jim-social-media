@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { supabase } from '../lib/supabase'
+import { supabase, deriveMonth } from '../lib/supabase'
 
 const TEAM = ['Karlo','Bryan','Arella','Kati','Yola','Joshua Jantz','Josua Ua']
 const ROUTINE = [
@@ -30,7 +30,7 @@ export default function Meeting({ month }) {
 
   const save = async () => {
     if (!form.meeting_date) { alert('Bitte ein Datum auswählen.'); return }
-    const payload = { ...form, month }
+    const payload = { ...form, month: deriveMonth(form.meeting_date, month) }
     const { error } = meeting?.id
       ? await supabase.from('meetings').update(payload).eq('id', meeting.id)
       : await supabase.from('meetings').insert(payload)

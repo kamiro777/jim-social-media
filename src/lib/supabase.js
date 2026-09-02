@@ -22,3 +22,10 @@ export const STATUS_COLORS = {
   'Gepostet': '#10B981',
 }
 export const WEEKDAYS = ['Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag', 'Sonntag']
+
+// Leitet den Monats-Filterwert ("YYYY-MM") aus einem echten Datum ab, statt ihn
+// getrennt zu pflegen — verhindert, dass month und post_date/due_date auseinanderlaufen.
+// Ohne Datum (z.B. eine Idee ohne Termin) bleibt der aktuell gewählte Sidebar-Monat als Fallback.
+export function deriveMonth(dateStr, fallbackMonth) {
+  return dateStr ? dateStr.slice(0, 7) : fallbackMonth
+}

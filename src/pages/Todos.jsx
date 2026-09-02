@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
-import { supabase } from '../lib/supabase'
+import { supabase, deriveMonth } from '../lib/supabase'
 
 const TEAM = ['Alle','Karlo','Bryan','Arella','Kati','Yola','Joshua Jantz','Josua Ua']
 const CHANNELS = [
@@ -30,7 +30,7 @@ export default function Todos({ month }) {
 
   const save = async () => {
     if (!form.task) return
-    const payload = { ...form, month }
+    const payload = { ...form, month: deriveMonth(form.due_date, month) }
     const { error } = editId
       ? await supabase.from('todos').update(payload).eq('id', editId)
       : await supabase.from('todos').insert(payload)

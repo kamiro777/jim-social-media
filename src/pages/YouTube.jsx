@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
-import { supabase, STATUSES } from '../lib/supabase'
+import { supabase, STATUSES, deriveMonth } from '../lib/supabase'
 
 const TEAM = ['Karlo','Bryan','Arella','Kati','Yola','Joshua Jantz','Josua Ua']
 const YT_FORMATS = ['Livestream/VOD','Podcast-Episode','Worship Session','Shorts']
@@ -20,7 +20,7 @@ export default function YouTube({ month }) {
 
   const save = async () => {
     if (!form.topic) return
-    const payload = { ...form, month }
+    const payload = { ...form, month: deriveMonth(form.post_date, month) }
     const { error } = editId
       ? await supabase.from('posts').update(payload).eq('id', editId)
       : await supabase.from('posts').insert(payload)

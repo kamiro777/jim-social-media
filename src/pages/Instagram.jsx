@@ -1,6 +1,6 @@
 import { useState, useEffect, Fragment } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
-import { supabase, FORMATS, STATUSES, WEEKDAYS } from '../lib/supabase'
+import { supabase, FORMATS, STATUSES, WEEKDAYS, deriveMonth } from '../lib/supabase'
 
 const TEAM = ['Alle','Karlo','Bryan','Arella','Kati','Yola','Joshua Jantz','Josua Ua']
 const IG_CHANNELS = [
@@ -28,7 +28,7 @@ export default function Instagram({ month }) {
 
   const save = async () => {
     if (!form.topic) return
-    const payload = { ...form, month }
+    const payload = { ...form, month: deriveMonth(form.post_date, month) }
     const { error } = editId
       ? await supabase.from('posts').update(payload).eq('id', editId)
       : await supabase.from('posts').insert(payload)
