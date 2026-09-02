@@ -1,7 +1,5 @@
 import { useState, useEffect } from 'react'
-import { supabase, CHANNELS, STATUS_COLORS } from '../lib/supabase'
-const SUPABASE_URL = 'https://rpbheglnhnpytxiunyij.supabase.co'
-const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY
+import { supabase, CHANNELS, STATUS_COLORS, SUPABASE_URL, SUPABASE_ANON_KEY } from '../lib/supabase'
 
 const IG_CHANNELS = ['jim_icg','ketawa','worship']
 
@@ -15,14 +13,6 @@ function getWeekRange(offset = 0) {
   sunday.setDate(monday.getDate() + 6)
   sunday.setHours(23,59,59,999)
   return { start: monday, end: sunday }
-}
-
-function getTwoWeekRange() {
-  const { start } = getWeekRange(1)
-  const end = new Date(start)
-  end.setDate(start.getDate() + 13)
-  end.setHours(23,59,59,999)
-  return { start, end }
 }
 
 function isOverdue(due_date) {
@@ -84,6 +74,9 @@ export default function Dashboard({ month }) {
     if (res.ok) {
       setEmailSent(true)
       setTimeout(() => setEmailSent(false), 4000)
+    } else {
+      const text = await res.text().catch(() => '')
+      alert(`Fehler beim Senden (${res.status}): ${text || 'Unbekannter Fehler'}`)
     }
   } catch (e) {
     alert('Fehler beim Senden: ' + e.message)

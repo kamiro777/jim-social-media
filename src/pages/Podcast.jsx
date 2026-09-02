@@ -18,14 +18,29 @@ export default function Podcast() {
 
   const save = async () => {
     if (!form.guest) return
-    if (editId) await supabase.from('podcast_episodes').update(form).eq('id', editId)
-    else await supabase.from('podcast_episodes').insert(form)
+    const { error } = editId
+      ? await supabase.from('podcast_episodes').update(form).eq('id', editId)
+      : await supabase.from('podcast_episodes').insert(form)
+    if (error) { alert('Fehler beim Speichern: ' + error.message); return }
     setShowModal(false); setEditId(null); setForm({...empty}); load()
   }
 
-  const del = async (id) => { if(!confirm('Episode löschen?')) return; await supabase.from('podcast_episodes').delete().eq('id',id); load() }
-  const toggleCheck = async (ep, field) => { await supabase.from('podcast_episodes').update({[field]:!ep[field]}).eq('id',ep.id); load() }
-  const setStatus = async (id, status) => { await supabase.from('podcast_episodes').update({status}).eq('id',id); load() }
+  const del = async (id) => {
+    if(!confirm('Episode löschen?')) return
+    const { error } = await supabase.from('podcast_episodes').delete().eq('id',id)
+    if (error) { alert('Fehler beim Löschen: ' + error.message); return }
+    load()
+  }
+  const toggleCheck = async (ep, field) => {
+    const { error } = await supabase.from('podcast_episodes').update({[field]:!ep[field]}).eq('id',ep.id)
+    if (error) { alert('Fehler beim Speichern: ' + error.message); return }
+    load()
+  }
+  const setStatus = async (id, status) => {
+    const { error } = await supabase.from('podcast_episodes').update({status}).eq('id',id)
+    if (error) { alert('Fehler beim Speichern: ' + error.message); return }
+    load()
+  }
   const openEdit = (ep) => { setForm({...ep}); setEditId(ep.id); setShowModal(true) }
 
   const Check = ({ ep, field, label }) => (

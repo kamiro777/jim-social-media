@@ -17,8 +17,28 @@ const NAV = [
   { to: '/meeting', label: 'Meeting', icon: '◆' },
 ]
 
-const MONTHS = ['2026-04','2026-05','2026-06','2026-07','2026-08','2026-09']
-const MONTH_LABELS = { '2026-04':'April 26','2026-05':'Mai 26','2026-06':'Juni 26','2026-07':'Juli 26','2026-08':'Aug 26','2026-09':'Sep 26' }
+const MONTH_NAMES = ['Jan','Feb','März','April','Mai','Juni','Juli','Aug','Sep','Okt','Nov','Dez']
+
+function currentMonthKey() {
+  const now = new Date()
+  return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`
+}
+
+// Rollierendes Fenster: 3 Monate zurück bis 9 Monate voraus, damit die Auswahl nie ausläuft.
+function buildMonthRange(monthsBack = 3, monthsForward = 9) {
+  const now = new Date()
+  const months = []
+  for (let i = -monthsBack; i <= monthsForward; i++) {
+    const d = new Date(now.getFullYear(), now.getMonth() + i, 1)
+    const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`
+    months.push([key, `${MONTH_NAMES[d.getMonth()]} ${String(d.getFullYear()).slice(2)}`])
+  }
+  return months
+}
+
+const MONTH_ENTRIES = buildMonthRange()
+const MONTHS = MONTH_ENTRIES.map(([key]) => key)
+const MONTH_LABELS = Object.fromEntries(MONTH_ENTRIES)
 
 function BottomNav() {
   return (
@@ -68,7 +88,7 @@ function Sidebar({ month, setMonth }) {
 }
 
 function AppShell() {
-  const [month, setMonth] = useState('2026-05')
+  const [month, setMonth] = useState(currentMonthKey())
   const [menuOpen, setMenuOpen] = useState(false)
   const location = useLocation()
   const titles = { '/': 'Dashboard', '/instagram': 'Instagram', '/youtube': 'YouTube', '/podcast': 'Podcast', '/todos': 'Team To-Dos', '/meeting': 'Meeting' }

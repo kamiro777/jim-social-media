@@ -20,14 +20,29 @@ export default function YouTube({ month }) {
   const save = async () => {
     if (!form.topic) return
     const payload = { ...form, month }
-    if (editId) await supabase.from('posts').update(payload).eq('id', editId)
-    else await supabase.from('posts').insert(payload)
+    const { error } = editId
+      ? await supabase.from('posts').update(payload).eq('id', editId)
+      : await supabase.from('posts').insert(payload)
+    if (error) { alert('Fehler beim Speichern: ' + error.message); return }
     setShowModal(false); setEditId(null); setForm({...empty,month}); load()
   }
 
-  const del = async (id) => { if (!confirm('Löschen?')) return; await supabase.from('posts').delete().eq('id',id); load() }
-  const toggleCheck = async (post, field) => { await supabase.from('posts').update({[field]:!post[field]}).eq('id',post.id); load() }
-  const setStatus = async (id, status) => { await supabase.from('posts').update({status}).eq('id',id); load() }
+  const del = async (id) => {
+    if (!confirm('Löschen?')) return
+    const { error } = await supabase.from('posts').delete().eq('id',id)
+    if (error) { alert('Fehler beim Löschen: ' + error.message); return }
+    load()
+  }
+  const toggleCheck = async (post, field) => {
+    const { error } = await supabase.from('posts').update({[field]:!post[field]}).eq('id',post.id)
+    if (error) { alert('Fehler beim Speichern: ' + error.message); return }
+    load()
+  }
+  const setStatus = async (id, status) => {
+    const { error } = await supabase.from('posts').update({status}).eq('id',id)
+    if (error) { alert('Fehler beim Speichern: ' + error.message); return }
+    load()
+  }
   const openEdit = (post) => { setForm({...post}); setEditId(post.id); setShowModal(true) }
 
   const fmtColors = { 'Livestream/VOD':'var(--green)', 'Podcast-Episode':'var(--purple)', 'Worship Session':'var(--gold)', 'Shorts':'var(--blue)' }

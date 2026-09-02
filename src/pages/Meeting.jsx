@@ -29,9 +29,12 @@ export default function Meeting({ month }) {
   useEffect(() => { load() }, [month])
 
   const save = async () => {
+    if (!form.meeting_date) { alert('Bitte ein Datum auswählen.'); return }
     const payload = { ...form, month }
-    if (meeting?.id) await supabase.from('meetings').update(payload).eq('id', meeting.id)
-    else await supabase.from('meetings').insert(payload)
+    const { error } = meeting?.id
+      ? await supabase.from('meetings').update(payload).eq('id', meeting.id)
+      : await supabase.from('meetings').insert(payload)
+    if (error) { alert('Fehler beim Speichern: ' + error.message); return }
     setSaved(true); setTimeout(()=>setSaved(false), 2000); load()
   }
 

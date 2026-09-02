@@ -1,9 +1,9 @@
 import { createClient } from '@supabase/supabase-js'
 
-export const supabase = createClient(
-  'https://rpbheglnhnpytxiunyij.supabase.co',
-  'sb_publishable_NwBTuzxgBKee6tOg0WttNA_wIdFeZD8'
-)
+export const SUPABASE_URL = 'https://rpbheglnhnpytxiunyij.supabase.co'
+export const SUPABASE_ANON_KEY = 'sb_publishable_NwBTuzxgBKee6tOg0WttNA_wIdFeZD8'
+
+export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
 
 export const CHANNELS = [
   { id: 'jim_icg', name: '@jim_icg', platform: 'Instagram', color: '#E94560', emoji: '🔴' },

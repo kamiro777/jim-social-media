@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, Fragment } from 'react'
 import { supabase, FORMATS, STATUSES, WEEKDAYS } from '../lib/supabase'
 
 const TEAM = ['Alle','Karlo','Bryan','Arella','Kati','Yola','Joshua Jantz','Josua Ua']
@@ -28,13 +28,28 @@ export default function Instagram({ month }) {
   const save = async () => {
     if (!form.topic) return
     const payload = { ...form, month }
-    if (editId) await supabase.from('posts').update(payload).eq('id', editId)
-    else await supabase.from('posts').insert(payload)
+    const { error } = editId
+      ? await supabase.from('posts').update(payload).eq('id', editId)
+      : await supabase.from('posts').insert(payload)
+    if (error) { alert('Fehler beim Speichern: ' + error.message); return }
     setShowModal(false); setEditId(null); setForm({ ...empty, month }); load()
   }
-  const del = async (id) => { if (!confirm('Post löschen?')) return; await supabase.from('posts').delete().eq('id', id); load() }
-  const toggleCheck = async (post, field) => { await supabase.from('posts').update({ [field]: !post[field] }).eq('id', post.id); load() }
-  const setStatus = async (id, status) => { await supabase.from('posts').update({ status }).eq('id', id); load() }
+  const del = async (id) => {
+    if (!confirm('Post löschen?')) return
+    const { error } = await supabase.from('posts').delete().eq('id', id)
+    if (error) { alert('Fehler beim Löschen: ' + error.message); return }
+    load()
+  }
+  const toggleCheck = async (post, field) => {
+    const { error } = await supabase.from('posts').update({ [field]: !post[field] }).eq('id', post.id)
+    if (error) { alert('Fehler beim Speichern: ' + error.message); return }
+    load()
+  }
+  const setStatus = async (id, status) => {
+    const { error } = await supabase.from('posts').update({ status }).eq('id', id)
+    if (error) { alert('Fehler beim Speichern: ' + error.message); return }
+    load()
+  }
   const openEdit = (post) => { setForm({ ...post }); setEditId(post.id); setShowModal(true) }
   const toggleRow = (id) => setExpandedRows(prev => ({ ...prev, [id]: !prev[id] }))
 
@@ -116,9 +131,8 @@ export default function Instagram({ month }) {
                 const posted = isPosted(post)
                 const expanded = expandedRows[post.id]
                 return (
-                  <>
+                  <Fragment key={post.id}>
                     <tr
-                      key={post.id}
                       style={{
                         opacity: posted ? 0.45 : 1,
                         transition: 'opacity 0.2s',
@@ -159,7 +173,7 @@ export default function Instagram({ month }) {
 
                     {/* Aufgeklappte Unteraufgaben */}
                     {expanded && (
-                      <tr key={`${post.id}-checks`} style={{background:'var(--bg2)',opacity: posted ? 0.45 : 1}}>
+                      <tr style={{background:'var(--bg2)',opacity: posted ? 0.45 : 1}}>
                         <td colSpan={7} style={{padding:'10px 16px'}}>
                           <div style={{display:'flex',gap:16,flexWrap:'wrap',alignItems:'center'}}>
                             {[['shooting_done','🎬 Shoot'],['editing_done','✂️ Edit'],['caption_done','📝 Caption'],['thumbnail_done','🖼 Thumb']].map(([field, label]) => (
@@ -183,7 +197,7 @@ export default function Instagram({ month }) {
                         </td>
                       </tr>
                     )}
-                  </>
+                  </Fragment>
                 )
               })}
             </tbody>

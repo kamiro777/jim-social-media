@@ -22,7 +22,7 @@ export default function Todos({ month }) {
   const [filterResponsible, setFilterResponsible] = useState('all')
 
   const load = async () => {
-    const { data } = await supabase.from('todos').select('*').order('done').order('due_date', { ascending: true, nullsFirst: false })
+    const { data } = await supabase.from('todos').select('*').eq('month', month).order('done').order('due_date', { ascending: true, nullsFirst: false })
     setTodos(data || [])
   }
   useEffect(() => { load() }, [month])
@@ -30,12 +30,23 @@ export default function Todos({ month }) {
   const save = async () => {
     if (!form.task) return
     const payload = { ...form, month }
-    if (editId) await supabase.from('todos').update(payload).eq('id', editId)
-    else await supabase.from('todos').insert(payload)
+    const { error } = editId
+      ? await supabase.from('todos').update(payload).eq('id', editId)
+      : await supabase.from('todos').insert(payload)
+    if (error) { alert('Fehler beim Speichern: ' + error.message); return }
     setShowModal(false); setEditId(null); setForm({...empty}); load()
   }
-  const del = async (id) => { if (!confirm('Löschen?')) return; await supabase.from('todos').delete().eq('id', id); load() }
-  const toggleDone = async (todo) => { await supabase.from('todos').update({ done: !todo.done }).eq('id', todo.id); load() }
+  const del = async (id) => {
+    if (!confirm('Löschen?')) return
+    const { error } = await supabase.from('todos').delete().eq('id', id)
+    if (error) { alert('Fehler beim Löschen: ' + error.message); return }
+    load()
+  }
+  const toggleDone = async (todo) => {
+    const { error } = await supabase.from('todos').update({ done: !todo.done }).eq('id', todo.id)
+    if (error) { alert('Fehler beim Speichern: ' + error.message); return }
+    load()
+  }
   const openEdit = (t) => { setForm({...t}); setEditId(t.id); setShowModal(true) }
 
   const filtered = todos.filter(t =>
