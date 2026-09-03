@@ -43,7 +43,7 @@ export default function QuickAdd() {
     } else if (form.platform === 'podcast') {
       ({ error } = await supabase.from('podcast_episodes').insert({
         guest: form.title, publish_date: form.date || null, status: 'Offen',
-        notes: `Verantwortlich: ${form.responsible}`,
+        responsible: form.responsible,
       }))
     } else {
       ({ error } = await supabase.from('posts').insert({

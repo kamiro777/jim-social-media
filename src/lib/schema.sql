@@ -27,6 +27,7 @@ create table if not exists podcast_episodes (
   guest text not null,
   record_date date,
   publish_date date,
+  responsible text default 'Team',
   ig_teaser boolean default false,
   yt_upload boolean default false,
   editing_done boolean default false,
@@ -71,3 +72,8 @@ create policy "Allow all for anon" on posts for all using (true) with check (tru
 create policy "Allow all for anon" on podcast_episodes for all using (true) with check (true);
 create policy "Allow all for anon" on todos for all using (true) with check (true);
 create policy "Allow all for anon" on meetings for all using (true) with check (true);
+
+-- Migration (2026-09-04): responsible column on podcast_episodes.
+-- Run this once against an existing database that predates it —
+-- the create table above already includes it for fresh setups.
+alter table podcast_episodes add column if not exists responsible text default 'Team';

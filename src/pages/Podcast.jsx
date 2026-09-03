@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
-import { supabase } from '../lib/supabase'
+import { supabase, TEAM } from '../lib/supabase'
 
 const STATUSES = ['Offen','Filmed','In Arbeit','Bereit','Gepostet']
-const empty = { episode_number:'', guest:'', record_date:'', publish_date:'', ig_teaser:false, yt_upload:false, editing_done:false, cover_done:false, status:'Offen', notes:'' }
+const empty = { episode_number:'', guest:'', record_date:'', publish_date:'', responsible:TEAM[0], ig_teaser:false, yt_upload:false, editing_done:false, cover_done:false, status:'Offen', notes:'' }
 
 export default function Podcast() {
   const [eps, setEps] = useState([])
@@ -102,18 +102,19 @@ export default function Podcast() {
       <div className="card" style={{padding:0,overflow:'hidden'}}>
         <table className="data-table">
           <thead><tr>
-            <th>#</th><th>Gast / Thema</th><th>Aufnahme</th><th>Veröffentlichung</th>
+            <th>#</th><th>Gast / Thema</th><th>Verantwortlich</th><th>Aufnahme</th><th>Veröffentlichung</th>
             <th>IG Teaser</th><th>YT Upload</th><th>Schnitt</th><th>Cover</th>
             <th>Status</th><th></th>
           </tr></thead>
           <tbody>
             {eps.length === 0 && (
-              <tr><td colSpan={10} style={{textAlign:'center',padding:32,color:'var(--text-dim)'}}>Noch keine Episoden</td></tr>
+              <tr><td colSpan={11} style={{textAlign:'center',padding:32,color:'var(--text-dim)'}}>Noch keine Episoden</td></tr>
             )}
             {eps.map(ep => (
               <tr key={ep.id} style={ep.status==='Gepostet'?{opacity:.45}:{}}>
                 <td style={{color:'var(--purple)',fontWeight:600}}>{ep.episode_number||'—'}</td>
                 <td style={{fontWeight:500}}>{ep.guest}{ep.notes&&<div style={{fontSize:10,color:'var(--text-dim)'}}>{ep.notes}</div>}</td>
+                <td style={{fontSize:11,color:'var(--text-muted)'}}>{ep.responsible||'—'}</td>
                 <td style={{fontSize:11,color:'var(--text-muted)'}}>{ep.record_date||'—'}</td>
                 <td style={{fontSize:11,color:'var(--text-muted)'}}>{ep.publish_date||'—'}</td>
                 <td><Check ep={ep} field="ig_teaser" label="IG Teaser"/></td>
@@ -162,6 +163,12 @@ export default function Podcast() {
                   <label className="form-label">Veröffentlichung</label>
                   <input className="form-input" type="date" value={form.publish_date} onChange={e=>setForm(f=>({...f,publish_date:e.target.value}))} />
                 </div>
+              </div>
+              <div className="form-group">
+                <label className="form-label">Verantwortlich</label>
+                <select className="form-select" value={form.responsible} onChange={e=>setForm(f=>({...f,responsible:e.target.value}))}>
+                  {TEAM.map(t => <option key={t} value={t}>{t}</option>)}
+                </select>
               </div>
               <div className="form-group">
                 <label className="form-label">Status</label>

@@ -128,7 +128,7 @@ export default function Dashboard({ month }) {
     })),
     ...episodes.map(e => ({
       id: `ep-${e.id}`, rawId: e.id, type: 'episode', date: e.publish_date || e.record_date, title: `Ep ${e.episode_number || '—'} · ${e.guest}`,
-      channel_id: 'podcast', responsible: null, status: e.status,
+      channel_id: 'podcast', responsible: e.responsible, status: e.status,
       meta: e.publish_date ? null : 'Aufnahme',
     })),
   ].map(item => ({ ...item, overdue: isOverdue(item.date) }))
