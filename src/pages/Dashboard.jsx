@@ -110,6 +110,8 @@ export default function Dashboard({ month }) {
       setLoading(false)
     }
     load()
+    window.addEventListener('jim:refresh', load)
+    return () => window.removeEventListener('jim:refresh', load)
   }, [])
 
   // Alle Kanäle zu einer einheitlichen Liste zusammenführen

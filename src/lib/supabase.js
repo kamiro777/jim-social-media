@@ -13,6 +13,8 @@ export const CHANNELS = [
   { id: 'worship', name: 'JIM Worship', platform: 'Instagram', color: '#B8860B', emoji: '🟡' },
 ]
 
+export const TEAM = ['Karlo', 'Bryan', 'Arella', 'Kati', 'Yola', 'Joshua Jantz', 'Josua Ua']
+
 export const FORMATS = ['Reel', 'Post', 'Carousel', 'Story', 'Audiogram', 'Livestream', 'Video']
 export const STATUSES = ['Offen', 'In Arbeit', 'Bereit', 'Gepostet']
 export const STATUS_COLORS = {

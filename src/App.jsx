@@ -6,6 +6,7 @@ import YouTube from './pages/YouTube'
 import Podcast from './pages/Podcast'
 import Todos from './pages/Todos'
 import Meeting from './pages/Meeting'
+import QuickAdd from './components/QuickAdd'
 import './App.css'
 
 const NAV = [
@@ -128,6 +129,7 @@ function AppShell() {
           <h1>{titles[location.pathname] || 'JIM'}</h1>
           <div className="header-meta">
             <span className="month-badge">{MONTH_LABELS[month]?.toUpperCase()}</span>
+            <QuickAdd />
           </div>
         </header>
         <div className="page-body">
